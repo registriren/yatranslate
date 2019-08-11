@@ -1,2 +1,7 @@
-# tamtamapi_lite
-Попытка создать набор простых инструментов для написания ботов на базе API мессенджера TamTam. Набор содержит базовый функционал взаимодействия бота с пользователями и предназначен для начинающих программистов.
+# yatranslate
+Бот построен на базе https://github.com/registriren/tamtamapi_lite
+
+Структура файла config.json:
+
+	"access_token": "<токен, полученный от @PrimeBot TamTam>",
+  	"key": "<API - ключ от Яндекс https://translate.yandex.ru/developers/keys >"
