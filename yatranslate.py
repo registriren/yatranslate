@@ -3,7 +3,7 @@ import requests
 import urllib.parse
 import json
 
-config = 'config.json' # setting file
+config = 'config.json'
 base_url = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
 lang_all = {}
 with open(config, 'r', encoding='utf-8') as c:
