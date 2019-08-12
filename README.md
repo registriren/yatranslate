@@ -1,5 +1,5 @@
 # yatranslate
-Бот построен на базе https://github.com/registriren/tamtamapi_lite
+Бот построен на базе https://github.com/registriren/botapitamtam
 
 Структура файла config.json:
 
