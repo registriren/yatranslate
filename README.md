@@ -1,5 +1,9 @@
 # yatranslate
-Бот построен на базе https://github.com/registriren/botapitamtam
+
+Переводчик на базе сервиса «Яндекс.Переводчик».
+http://translate.yandex.ru
+
+Бот построен с использованием библиотеки https://github.com/registriren/botapitamtam
 
 Структура файла config.json:
 
