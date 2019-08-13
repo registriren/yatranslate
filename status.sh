@@ -1,6 +1,6 @@
 #!/bin/sh
-while :
-do
+#while :
+#do
 for PID in `cat log.pid`
 do
   if ps -p $PID > /dev/null
@@ -11,5 +11,5 @@ do
      # running
   fi
 done
-sleep 4
-done
+#sleep 4
+#done
