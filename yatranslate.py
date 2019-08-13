@@ -30,7 +30,7 @@ def main():
             buttons = [{"type": 'callback',
                         "text": 'Русский',
                         "payload": 'ru'},
-                       {"type": 'link',
+                       {"type": 'callback',
                         "text": 'English',
                         "payload": 'en'}]
             bot.send_buttons('Направление перевода', buttons, chat_id) #вызываем две кнопки с одним описанием
