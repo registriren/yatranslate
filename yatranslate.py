@@ -1,7 +1,10 @@
 from botapitamtam import BotHandler
 import requests
-import urllib.parse
+import urllib3
 import json
+import logging
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 config = 'config.json'
 base_url = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
