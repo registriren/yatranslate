@@ -2,6 +2,7 @@
 ### Example user template template
 ### Example user template
 
+config.json
 # IntelliJ project files
 .idea
 *.iml
@@ -131,5 +132,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-!/config.json
