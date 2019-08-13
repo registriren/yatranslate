@@ -3,5 +3,6 @@
     do
       kill -9 ${j}
     done
+    echo "$j is killed"
     rm log.pid
     rm log.txt
