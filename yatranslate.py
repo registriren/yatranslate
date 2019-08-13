@@ -1,6 +1,6 @@
 from botapitamtam import BotHandler
 import requests
-import urllib3
+import urllib
 import json
 import logging
 
