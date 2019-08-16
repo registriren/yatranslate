@@ -65,6 +65,8 @@ def main():
                lang_detect = ret['lang']
                if lang_detect == 'ru':
                    lang = 'en'
+               if lang_detect == 'en':
+                   lang = 'ru'
                url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang), '&format=plain'])
                response = requests.get(url)
                ret = response.json()
