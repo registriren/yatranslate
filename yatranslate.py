@@ -20,11 +20,12 @@ def urlencode(str):
   return urllib.parse.quote(str)
 
 def main():
-
+    marker = None
     while True:
-        last_update = bot.get_updates()
+        last_update = bot.get_updates(marker)
         if last_update == None: #проверка на пустое событие, если пусто - возврат к началу цикла
             continue
+        marker = bot.get_marker(last_update)
         type_upd = bot.get_update_type(last_update)
         text = bot.get_text(last_update)
         chat_id = bot.get_chat_id(last_update)
