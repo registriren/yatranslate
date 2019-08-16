@@ -63,7 +63,7 @@ def main():
                response = requests.get(url)
                ret = response.json()
                translate = ret['text'][0]
-               bot.send_message('{}\n\n_____\nПереведено сервисом «Яндекс.Переводчик»\nhttp://translate.yandex.ru/'.format(translate), chat_id)
+               bot.send_message('{}\n\n_____\nПереведено сервисом «Яндекс.Переводчик»'.format(translate), chat_id)
 
 if __name__ == '__main__':
     try:
