@@ -38,6 +38,14 @@ def main():
                         "payload": 'en'}]
             bot.send_buttons('Направление перевода', buttons, chat_id) #вызываем две кнопки с одним описанием
             text = None
+        if text == '/lang ru':
+            lang_all.update({chat_id : 'ru'})
+            bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
+            text = None
+        if text == '/lang en':
+            lang_all.update({chat_id : 'en'})
+            bot.send_message('______\nТекст будет переводиться на English', chat_id)
+            text = None    
         if payload != None:
             print(lang_all)
             lang_all.update({chat_id : payload})
