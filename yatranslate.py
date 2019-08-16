@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 config = 'config.json'
-base_url = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
+base_url = 'https://translate.yandex.net/api/v1.5/tr.json/'
 lang_all = {}
 with open(config, 'r', encoding='utf-8') as c:
     conf = json.load(c)
@@ -59,7 +59,13 @@ def main():
             lang = 'ru'
         if text != None:
                text = urlencode(text)
-               url = ''.join([base_url, '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang), '&format=plain'])
+               url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
+               response = requests.get(url_lang)
+               ret = response.json()
+               lang_detect = ret['lang']
+               if lang_detect == 'ru':
+                   lang = 'en'
+               url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang), '&format=plain'])
                response = requests.get(url)
                ret = response.json()
                translate = ret['text'][0]
