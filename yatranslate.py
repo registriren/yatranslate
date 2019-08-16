@@ -40,11 +40,11 @@ def main():
             text = None
         if text == '/lang ru':
             lang_all.update({chat_id : 'ru'})
-            bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
+            bot.send_message('Текст будет переводиться на Русский', chat_id)
             text = None
         if text == '/lang en':
             lang_all.update({chat_id : 'en'})
-            bot.send_message('______\nТекст будет переводиться на English', chat_id)
+            bot.send_message('Текст будет переводиться на English', chat_id)
             text = None    
         if payload != None:
             print(lang_all)
