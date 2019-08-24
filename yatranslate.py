@@ -71,16 +71,18 @@ def main():
                url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
                response = requests.get(url_lang)
                ret = response.json()
-               lang_detect = ret['lang']
-               if lang_detect == 'ru':
-                   lang = 'en'
-               if lang_detect == 'en':
-                   lang = 'ru'
-               url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang), '&format=plain'])
-               response = requests.get(url)
-               ret = response.json()
-               translate = ret['text'][0]
-               bot.send_message('{}\n_____\nПереведено сервисом «Яндекс.Переводчик»'.format(translate), chat_id)
+               if ret['code'] == 200:
+                    lang_detect = ret['lang']
+                    if lang_detect == 'ru':
+                       lang = 'en'
+                    if lang_detect == 'en':
+                       lang = 'ru'
+                    url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang), '&format=plain'])
+                    response = requests.get(url)
+                    ret = response.json()
+                    translate = ret['text'][0]
+                    bot.send_message('{}\n_____\nПереведено сервисом «Яндекс.Переводчик»'.format(translate), chat_id)
+               else: bot.send_message('Перевод невозможен', chat_id)
 
 if __name__ == '__main__':
     try:
