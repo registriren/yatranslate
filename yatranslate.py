@@ -81,6 +81,7 @@ def main():
                     response = requests.get(url)
                     ret = response.json()
                     translate = ret['text'][0]
+                    print(len(translate))
                     bot.send_message('{}\n_____\nПереведено сервисом «Яндекс.Переводчик»'.format(translate), chat_id)
                else: bot.send_message('Перевод невозможен', chat_id)
 
