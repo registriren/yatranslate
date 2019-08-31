@@ -31,12 +31,12 @@ def main():
         chat_id = bot.get_chat_id(last_update)
         payload = bot.get_payload(last_update)
         if text == '/lang':
-            buttons = [{"type": 'callback',
+            buttons = [[{"type": 'callback',
                         "text": 'Русский',
                         "payload": 'ru'},
                        {"type": 'callback',
                         "text": 'English',
-                        "payload": 'en'}]
+                        "payload": 'en'}]]
             bot.send_buttons('Направление перевода', buttons, chat_id) #вызываем две кнопки с одним описанием
             text = None
         if text == '/lang ru':
