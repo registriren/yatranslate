@@ -5,4 +5,5 @@
     done
     echo "$j is killed"
     rm log.pid
+    cp log.txt log.$(date '+%s').txt
     rm log.txt
