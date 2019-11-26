@@ -7,5 +7,7 @@ http://translate.yandex.ru
 
 Содержимое файла config.json:
 
+	{
 	"access_token": "<токен, полученный от @PrimeBot TamTam>",
   	"key": "<API - ключ от Яндекс https://translate.yandex.ru/developers/keys >"
+	}
