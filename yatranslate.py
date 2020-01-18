@@ -38,12 +38,16 @@ def main():
             payload = bot.get_payload(last_update)
             if text == '/lang':
                 buttons = [[{"type": 'callback',
+                             "text": 'Авто|Auto',
+                             "payload": 'auto'},
+                            {"type": 'callback',
                              "text": 'Русский',
                              "payload": 'ru'},
                             {"type": 'callback',
                              "text": 'English',
                              "payload": 'en'}]]
-                bot.send_buttons('Направление перевода\nTranslation direction', buttons, chat_id)  # вызываем две кнопки с одним описанием
+                bot.send_buttons('Направление перевода\nTranslation direction', buttons,
+                                 chat_id)  # вызываем три кнопки с одним описанием
                 text = None
             if text == '/lang ru':
                 lang_all.update({chat_id: 'ru'})
@@ -53,6 +57,10 @@ def main():
                 lang_all.update({chat_id: 'en'})
                 bot.send_message('Text will be translated into English', chat_id)
                 text = None
+            if text == '/lang auto':
+                lang_all.update({chat_id: 'auto'})
+                bot.send_message('Русский|English - автоматически|automatically', chat_id)
+                text = None
             if payload is not None:
                 print(lang_all)
                 lang_all.update({chat_id: payload})
@@ -61,6 +69,8 @@ def main():
                 text = None
                 if lang == 'ru':
                     bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
+                elif lang == 'auto':
+                    bot.send_message('______\nРусский|English - автоматически|automatically', chat_id)
                 else:
                     bot.send_message('______\nText will be translated into English', chat_id)
             if type_upd == 'bot_started':
@@ -79,27 +89,31 @@ def main():
                 url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
                 response = requests.get(url_lang)
                 ret = response.json()
+                if lang == 'auto':
+                    lang_res = 'ru'
+                else:
+                    lang_res = lang
                 if ret['code'] == 200:
                     lang_detect = ret['lang']
-                    if lang_detect == 'ru':
-                        lang = 'en'
-                    if lang_detect == 'en':
-                        lang = 'ru'
-                    url = ''.join(
-                        [base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text), '&lang={}'.format(lang),
-                         '&format=plain'])
-                    response = requests.get(url)
-                    ret = response.json()
-                    translate = ret['text'][0]
-                    len_sym = len(translate)
-                    res_len += len_sym
-                    logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
-                    if res_len >> 10000000: # контроль в логах количества переведенных символов
-                        res_len == 0
-
-                    bot.send_message('{}\n_____\nПереведено сервисом «Яндекс.Переводчик»'.format(translate), chat_id)
-                else:
-                    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
+                    if lang == 'auto' and lang_detect == 'ru':
+                        lang_res = 'en'
+                    if lang == 'auto' and lang_detect == 'en':
+                        lang_res = 'ru'
+                    if lang_res != lang_detect:
+                        url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text),
+                                       '&lang={}'.format(lang_res),
+                                       '&format=plain'])
+                        response = requests.get(url)
+                        ret = response.json()
+                        translate = ret['text'][0]
+                        len_sym = len(translate)
+                        res_len += len_sym
+                        logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
+                        if res_len >> 10000000:  # контроль в логах количества переведенных символов
+                            res_len = 0
+                        bot.send_message(translate, chat_id)
+                # else:
+                #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
 
 
 if __name__ == '__main__':
