@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-config = 'config.json'
+config = 'config.jsn'
 base_url = 'https://translate.yandex.net/api/v1.5/tr.json/'
 lang_all = {}
 with open(config, 'r', encoding='utf-8') as c:

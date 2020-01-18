@@ -5,7 +5,7 @@ http://translate.yandex.ru
 
 Бот построен с использованием библиотеки https://github.com/registriren/botapitamtam
 
-Содержимое файла config.json:
+Содержимое файла config.jsn:
 
 	{
 	"access_token": "<токен, полученный от @PrimeBot TamTam>",
