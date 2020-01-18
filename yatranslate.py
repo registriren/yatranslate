@@ -36,6 +36,7 @@ def main():
             text = bot.get_text(last_update)
             chat_id = bot.get_chat_id(last_update)
             payload = bot.get_payload(last_update)
+            print(text)
             if text == '/lang':
                 buttons = [[{"type": 'callback',
                              "text": 'Авто|Auto',
@@ -83,7 +84,7 @@ def main():
             if chat_id in lang_all.keys():
                 lang = lang_all.get(chat_id)
             else:
-                lang = 'ru'
+                lang = 'auto'
             if text is not None:
                 text = url_encode(text)
                 url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
