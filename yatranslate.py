@@ -24,14 +24,9 @@ def url_encode(txt):
 
 def main():
     res_len = 0
-    marker = None
     while True:
-        update = bot.get_updates(marker)
-        if update is None:  # проверка на пустое событие, если пусто - возврат к началу цикла
-            continue
-        marker = bot.get_marker(update)
-        updates = update['updates']
-        for last_update in list(updates):  # формируем цикл на случай если updates вернул список из нескольких событий
+        last_update = bot.get_updates()
+        if last_update:
             type_upd = bot.get_update_type(last_update)
             text = bot.get_text(last_update)
             chat_id = bot.get_chat_id(last_update)
@@ -115,6 +110,7 @@ def main():
                         bot.send_message(translate, chat_id)
                 # else:
                 #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
+        continue
 
 
 if __name__ == '__main__':
