@@ -22,6 +22,31 @@ def url_encode(txt):
     return urllib.parse.quote(txt)
 
 
+def translate(text, lang):
+    text = url_encode(text)
+    url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
+    response = requests.get(url_lang)
+    ret = response.json()
+    if lang == 'auto':
+        lang_res = 'ru'
+    else:
+        lang_res = lang
+    if ret['code'] == 200:
+        lang_detect = ret['lang']
+        if lang == 'auto' and lang_detect == 'ru':
+            lang_res = 'en'
+        if lang == 'auto' and lang_detect == 'en':
+            lang_res = 'ru'
+        if lang_res != lang_detect:
+            url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text),
+                           '&lang={}'.format(lang_res),
+                           '&format=plain'])
+            response = requests.get(url)
+            ret = response.json()
+            translate_res = ret['text'][0]
+    return translate_res
+
+
 def main():
     res_len = 0
     while True:
@@ -80,36 +105,25 @@ def main():
                 lang = lang_all.get(chat_id)
             else:
                 lang = 'auto'
-            if text is not None:
-                text = url_encode(text)
-                url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
-                response = requests.get(url_lang)
-                ret = response.json()
-                if lang == 'auto':
-                    lang_res = 'ru'
+            if type_upd == 'message_construction_request':
+                text_const = bot.get_construct_text(last_update)
+                sid = bot.get_session_id(last_update)
+                if text_const:
+                    translt = translate(text_const, lang)
+                    bot.send_construct_message(sid, hint=None, text=translt)
                 else:
-                    lang_res = lang
-                if ret['code'] == 200:
-                    lang_detect = ret['lang']
-                    if lang == 'auto' and lang_detect == 'ru':
-                        lang_res = 'en'
-                    if lang == 'auto' and lang_detect == 'en':
-                        lang_res = 'ru'
-                    if lang_res != lang_detect:
-                        url = ''.join([base_url, 'translate', '?key={}'.format(key), '&text={}'.format(text),
-                                       '&lang={}'.format(lang_res),
-                                       '&format=plain'])
-                        response = requests.get(url)
-                        ret = response.json()
-                        translate = ret['text'][0]
-                        len_sym = len(translate)
-                        res_len += len_sym
-                        logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
-                        if res_len >> 10000000:  # контроль в логах количества переведенных символов
-                            res_len = 0
-                        bot.send_message(translate, chat_id)
-                # else:
-                #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
+                    bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
+                                                    'Enter the text to be translated and send to the chat')
+            elif text:
+                translt = translate(text, lang)
+                len_sym = len(translt)
+                res_len += len_sym
+                logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
+                if res_len >> 10000000:  # контроль в логах количества переведенных символов
+                    res_len = 0
+                bot.send_message(translt, chat_id)
+            # else:
+            #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
         continue
 
 
