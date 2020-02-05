@@ -44,6 +44,8 @@ def translate(text, lang):
             response = requests.get(url)
             ret = response.json()
             translate_res = ret['text'][0]
+        else:
+            translate_res = None
     return translate_res
 
 
@@ -109,7 +111,8 @@ def main():
                 text_const = bot.get_construct_text(last_update)
                 sid = bot.get_session_id(last_update)
                 if text_const:
-                    translt = translate(text_const, lang)
+                    translt = translate(text_const, 'auto')
+                elif translt:
                     bot.send_construct_message(sid, hint=None, text=translt)
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
