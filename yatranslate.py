@@ -112,8 +112,11 @@ def main():
                 sid = bot.get_session_id(last_update)
                 if text_const:
                     translt = translate(text_const, 'auto')
-                elif translt:
-                    bot.send_construct_message(sid, hint=None, text=translt)
+                    if translt:
+                        bot.send_construct_message(sid, hint=None, text=translt)
+                    else:
+                        bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
+                                                        'Enter the text to be translated and send to the chat')
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
                                                     'Enter the text to be translated and send to the chat')
