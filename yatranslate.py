@@ -129,7 +129,8 @@ def main():
                 logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
                 if res_len >> 10000000:  # контроль в логах количества переведенных символов
                     res_len = 0
-                bot.send_message(translt, chat_id)
+                if translt:
+                    bot.send_message(translt, chat_id)
                 text = None
                 translt = None
             # else:
