@@ -124,12 +124,12 @@ def main():
                     translt = None
             elif text:
                 translt = translate(text, lang)
-                len_sym = len(translt)
-                res_len += len_sym
-                logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
-                if res_len >> 10000000:  # контроль в логах количества переведенных символов
-                    res_len = 0
                 if translt:
+                    len_sym = len(translt)
+                    res_len += len_sym
+                    logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
+                    if res_len >> 10000000:  # контроль в логах количества переведенных символов
+                        res_len = 0
                     bot.send_message(translt, chat_id)
                 text = None
                 translt = None
