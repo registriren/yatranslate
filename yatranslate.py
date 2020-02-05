@@ -117,6 +117,8 @@ def main():
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
                                                     'Enter the text to be translated and send to the chat')
+                    text_const = None
+                    translt = None
             elif text:
                 translt = translate(text, lang)
                 len_sym = len(translt)
@@ -125,6 +127,8 @@ def main():
                 if res_len >> 10000000:  # контроль в логах количества переведенных символов
                     res_len = 0
                 bot.send_message(translt, chat_id)
+                text = None
+                translt = None
             # else:
             #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
         continue
