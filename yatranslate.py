@@ -23,6 +23,7 @@ def url_encode(txt):
 
 
 def translate(text, lang):
+    translate_res = None
     text = url_encode(text)
     url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
     response = requests.get(url_lang)
@@ -44,8 +45,6 @@ def translate(text, lang):
             response = requests.get(url)
             ret = response.json()
             translate_res = ret['text'][0]
-        else:
-            translate_res = None
     return translate_res
 
 
@@ -58,8 +57,9 @@ def main():
             text = bot.get_text(last_update)
             chat_id = bot.get_chat_id(last_update)
             payload = bot.get_payload(last_update)
-            print(text)
-            if text == '/lang':
+            mid = bot.get_message_id(last_update)
+            callback_id = bot.get_callback_id(last_update)
+            if text == '/lang' or text == '@yatranslate /lang':
                 buttons = [[{"type": 'callback',
                              "text": 'Авто|Auto',
                              "payload": 'auto'},
@@ -85,17 +85,21 @@ def main():
                 bot.send_message('Русский|English - автоматически|automatically', chat_id)
                 text = None
             if payload is not None:
-                print(lang_all)
                 lang_all.update({chat_id: payload})
-                print(lang_all)
                 lang = lang_all.get(chat_id)
                 text = None
                 if lang == 'ru':
-                    bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
+                    # bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
+                    bot.send_answer_callback(callback_id, 'Текст будет переводиться на Русский')
+                    bot.delete_message(mid)
                 elif lang == 'auto':
-                    bot.send_message('______\nРусский|English - автоматически|automatically', chat_id)
+                    # bot.send_message('______\nРусский|English - автоматически|automatically', chat_id)
+                    bot.send_answer_callback(callback_id, 'Русский|English - автоматически|automatically')
+                    bot.delete_message(mid)
                 else:
-                    bot.send_message('______\nText will be translated into English', chat_id)
+                    # bot.send_message('______\nText will be translated into English', chat_id)
+                    bot.send_answer_callback(callback_id, 'Text will be translated into English')
+                    bot.delete_message(mid)
             if type_upd == 'bot_started':
                 bot.send_message(
                     'Отправьте или перешлите боту текст. Язык переводимого текста определяется автоматически. '
@@ -105,6 +109,8 @@ def main():
                 text = None
             if chat_id in lang_all.keys():
                 lang = lang_all.get(chat_id)
+            elif '-' in str(chat_id):
+                lang = 'ru'
             else:
                 lang = 'auto'
             if type_upd == 'message_construction_request':
@@ -120,8 +126,6 @@ def main():
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
                                                     'Enter the text to be translated and send to the chat')
-                    text_const = None
-                    translt = None
             elif text:
                 translt = translate(text, lang)
                 if translt:
@@ -130,11 +134,10 @@ def main():
                     logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
                     if res_len >> 10000000:  # контроль в логах количества переведенных символов
                         res_len = 0
-                    bot.send_message(translt, chat_id)
-                text = None
-                translt = None
-            # else:
-            #    bot.send_message('Перевод невозможен\nTranslation not available', chat_id)
+                    if '-' in str(chat_id):
+                        bot.send_reply_message(translt, mid, chat_id)
+                    else:
+                        bot.send_message(translt, chat_id)
         continue
 
 
