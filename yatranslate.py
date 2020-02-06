@@ -72,15 +72,15 @@ def main():
                 bot.send_buttons('Направление перевода\nTranslation direction', buttons,
                                  chat_id)  # вызываем три кнопки с одним описанием
                 text = None
-            if text == '/lang ru':
+            if text == '/lang ru' or text == '@yatranslate /lang ru':
                 lang_all.update({chat_id: 'ru'})
                 bot.send_message('Текст будет переводиться на Русский', chat_id)
                 text = None
-            if text == '/lang en':
+            if text == '/lang en' or text == '@yatranslate /lang en':
                 lang_all.update({chat_id: 'en'})
                 bot.send_message('Text will be translated into English', chat_id)
                 text = None
-            if text == '/lang auto':
+            if text == '/lang auto' or text == '@yatranslate /lang auto':
                 lang_all.update({chat_id: 'auto'})
                 bot.send_message('Русский|English - автоматически|automatically', chat_id)
                 text = None
@@ -89,15 +89,12 @@ def main():
                 lang = lang_all.get(chat_id)
                 text = None
                 if lang == 'ru':
-                    # bot.send_message('______\nТекст будет переводиться на Русский', chat_id)
                     bot.send_answer_callback(callback_id, 'Текст будет переводиться на Русский')
                     bot.delete_message(mid)
                 elif lang == 'auto':
-                    # bot.send_message('______\nРусский|English - автоматически|automatically', chat_id)
                     bot.send_answer_callback(callback_id, 'Русский|English - автоматически|automatically')
                     bot.delete_message(mid)
                 else:
-                    # bot.send_message('______\nText will be translated into English', chat_id)
                     bot.send_answer_callback(callback_id, 'Text will be translated into English')
                     bot.delete_message(mid)
             if type_upd == 'bot_started':
