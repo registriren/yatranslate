@@ -59,9 +59,10 @@ def main():
     # last_update = bot.get_updates()
     last_update = request.get_json()  # для webhook
     if last_update:
+        chat_id = bot.get_chat_id(last_update)
+        bot.mark_seen(chat_id)
         type_upd = bot.get_update_type(last_update)
         text = bot.get_text(last_update)
-        chat_id = bot.get_chat_id(last_update)
         payload = bot.get_payload(last_update)
         mid = bot.get_message_id(last_update)
         callback_id = bot.get_callback_id(last_update)
