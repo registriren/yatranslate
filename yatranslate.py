@@ -3,6 +3,7 @@ import requests
 import urllib
 import json
 import logging
+from flask import Flask, request
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,6 +17,16 @@ with open(config, 'r', encoding='utf-8') as c:
     key = conf['key']
 
 bot = BotHandler(token)
+app = Flask(__name__)
+
+
+@app.route('/', methods=['POST'])
+def read_post():
+    data = json.dumps(request.json)
+    f = open('test.log', 'w')
+    f.write(data.txt)
+    f.close()
+    return data
 
 
 def url_encode(txt):
@@ -26,13 +37,16 @@ def translate(text, lang):
     translate_res = None
     text = url_encode(text)
     url_lang = ''.join([base_url, 'detect', '?key={}'.format(key), '&text={}'.format(text), '&hint=ru,en'])
-    response = requests.get(url_lang)
-    ret = response.json()
+    try:
+        response = requests.get(url_lang)
+        ret = response.json()
+    except Exception:
+        ret = None
     if lang == 'auto':
         lang_res = 'ru'
     else:
         lang_res = lang
-    if ret['code'] == 200:
+    if ret and ret['code'] == 200:
         lang_detect = ret['lang']
         if lang == 'auto' and lang_detect == 'ru':
             lang_res = 'en'
@@ -50,15 +64,20 @@ def translate(text, lang):
 
 def main():
     res_len = 0
-    while True:
-        last_update = bot.get_updates()
-        if last_update:
-            type_upd = bot.get_update_type(last_update)
-            text = bot.get_text(last_update)
-            chat_id = bot.get_chat_id(last_update)
-            payload = bot.get_payload(last_update)
-            mid = bot.get_message_id(last_update)
-            callback_id = bot.get_callback_id(last_update)
+    #last_update = bot.get_updates()
+    last_update = read_post()
+    print(last_update)
+    if last_update:
+        type_upd = bot.get_update_type(last_update)
+        text = bot.get_text(last_update)
+        chat_id = bot.get_chat_id(last_update)
+        payload = bot.get_payload(last_update)
+        mid = bot.get_message_id(last_update)
+        callback_id = bot.get_callback_id(last_update)
+        name = bot.get_name(last_update)
+        print(name)
+        admins = bot.get_chat_admins(chat_id)
+        if not admins or admins and name in [i['name'] for i in admins['members']]:
             if text == '/lang' or text == '@yatranslate /lang':
                 buttons = [[{"type": 'callback',
                              "text": 'Авто|Auto',
@@ -97,49 +116,55 @@ def main():
                 else:
                     bot.send_answer_callback(callback_id, 'Text will be translated into English')
                     bot.delete_message(mid)
-            if type_upd == 'bot_started':
-                bot.send_message(
-                    'Отправьте или перешлите боту текст. Язык переводимого текста определяется автоматически. '
-                    'Перевод по умолчанию на русский. Для изменения направления перевода используйте команду /lang',
-                    chat_id)
-                lang_all.update({chat_id: 'ru'})
-                text = None
-            if chat_id in lang_all.keys():
-                lang = lang_all.get(chat_id)
-            elif '-' in str(chat_id):
-                lang = 'ru'
-            else:
-                lang = 'auto'
-            if type_upd == 'message_construction_request':
-                text_const = bot.get_construct_text(last_update)
-                sid = bot.get_session_id(last_update)
-                if text_const:
-                    translt = translate(text_const, 'auto')
-                    if translt:
-                        bot.send_construct_message(sid, hint=None, text=translt)
-                    else:
-                        bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
-                                                        'Enter the text to be translated and send to the chat')
+
+        if type_upd == 'bot_started':
+            bot.send_message(
+                'Отправьте или перешлите боту текст. Язык переводимого текста определяется автоматически. '
+                'Перевод по умолчанию на русский. Для изменения направления перевода используйте команду /lang',
+                chat_id)
+            lang_all.update({chat_id: 'ru'})
+            text = None
+        if chat_id in lang_all.keys():
+            lang = lang_all.get(chat_id)
+        elif '-' in str(chat_id):
+            lang = 'ru'
+        else:
+            lang = 'auto'
+        if type_upd == 'message_construction_request':
+            text_const = bot.get_construct_text(last_update)
+            sid = bot.get_session_id(last_update)
+            if text_const:
+                translt = translate(text_const, 'auto')
+                if translt:
+                    bot.send_construct_message(sid, hint=None, text=translt)
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
                                                     'Enter the text to be translated and send to the chat')
-            elif text:
-                translt = translate(text, lang)
-                if translt:
-                    len_sym = len(translt)
-                    res_len += len_sym
-                    logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
-                    if res_len >> 10000000:  # контроль в логах количества переведенных символов
-                        res_len = 0
-                    if '-' in str(chat_id):
-                        bot.send_reply_message(translt, mid, chat_id)
-                    else:
-                        bot.send_message(translt, chat_id)
-        continue
+            else:
+                bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
+                                                'Enter the text to be translated and send to the chat')
+        elif text:
+            translt = translate(text, lang)
+            if translt:
+                len_sym = len(translt)
+                res_len += len_sym
+                logger.info('chat_id: {}, len symbols: {}, result {}'.format(chat_id, len_sym, res_len))
+                if res_len >> 10000000:  # контроль в логах количества переведенных символов
+                    res_len = 0
+                if '-' in str(chat_id):
+                    bot.send_reply_message(translt, mid, chat_id)
+                else:
+                    bot.send_message(translt, chat_id)
+
+
+if __name__ == '__main__':
+    app.run()
 
 
 if __name__ == '__main__':
     try:
-        main()
+        while True:
+            main()
     except KeyboardInterrupt:
         exit()
+
