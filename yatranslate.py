@@ -3,7 +3,7 @@ import requests
 import urllib
 import json
 import logging
-from flask import Flask, request
+from flask import Flask, request, jsonify  # для webhook
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,16 +17,7 @@ with open(config, 'r', encoding='utf-8') as c:
     key = conf['key']
 
 bot = BotHandler(token)
-app = Flask(__name__)
-
-
-@app.route('/', methods=['POST'])
-def read_post():
-    data = json.dumps(request.json)
-    f = open('test.log', 'w')
-    f.write(data.txt)
-    f.close()
-    return data
+app = Flask(__name__)  # для webhook
 
 
 def url_encode(txt):
@@ -62,11 +53,11 @@ def translate(text, lang):
     return translate_res
 
 
+@app.route('/', methods=['POST'])  # для webhook
 def main():
     res_len = 0
-    #last_update = bot.get_updates()
-    last_update = read_post()
-    print(last_update)
+    # last_update = bot.get_updates()
+    last_update = request.get_json()  # для webhook
     if last_update:
         type_upd = bot.get_update_type(last_update)
         text = bot.get_text(last_update)
@@ -75,7 +66,6 @@ def main():
         mid = bot.get_message_id(last_update)
         callback_id = bot.get_callback_id(last_update)
         name = bot.get_name(last_update)
-        print(name)
         admins = bot.get_chat_admins(chat_id)
         if not admins or admins and name in [i['name'] for i in admins['members']]:
             if text == '/lang' or text == '@yatranslate /lang':
@@ -155,16 +145,18 @@ def main():
                     bot.send_reply_message(translt, mid, chat_id)
                 else:
                     bot.send_message(translt, chat_id)
+    return jsonify(last_update)  # для webhook
 
 
-if __name__ == '__main__':
-    app.run()
-
-
-if __name__ == '__main__':
+if __name__ == '__main__':  # для webhook
     try:
-        while True:
-            main()
+        app.run(port=80, host="0.0.0.0")
     except KeyboardInterrupt:
         exit()
 
+# if __name__ == '__main__':
+#    try:
+#        while True:
+#            main()
+#    except KeyboardInterrupt:
+#        exit()
