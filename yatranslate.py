@@ -151,7 +151,7 @@ def main():
 
 if __name__ == '__main__':  # для webhook
     try:
-        app.run(port=80, host="0.0.0.0")
+        app.run(port=29347, host="0.0.0.0")
     except KeyboardInterrupt:
         exit()
 
