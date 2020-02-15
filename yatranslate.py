@@ -1,9 +1,12 @@
 from botapitamtam import BotHandler
+import sqlite3
+import os
 import requests
 import urllib
 import json
 import logging
-from flask import Flask, request, jsonify  # для webhook
+
+# from flask import Flask, request, jsonify  # для webhook
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,11 +20,49 @@ with open(config, 'r', encoding='utf-8') as c:
     key = conf['key']
 
 bot = BotHandler(token)
-app = Flask(__name__)  # для webhook
+# app = Flask(__name__)  # для webhook
+
+if not os.path.isfile('users.db'):
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("""CREATE TABLE users
+                      (id INTEGER PRIMARY KEY , lang TEXT)
+                   """)
+    conn.commit()
+    c.close()
+    conn.close()
+
+
+conn = sqlite3.connect("users.db", check_same_thread=False)
 
 
 def url_encode(txt):
     return urllib.parse.quote(txt)
+
+
+def set_lang(lang, id):
+    c = conn.cursor()
+    try:
+        c.execute("INSERT INTO users (id, lang) VALUES ({}, '{}')".format(id, lang))
+        logger.info('Creating a new record for chat_id(user_id) - {}, lang - {}'.format(id, lang))
+    except:
+        c.execute("UPDATE users SET lang = '{}' WHERE id = {}".format(lang, id))
+        logger.info('Update lang - {} for chat_id(user_id) - {}'.format(lang, id))
+    conn.commit()
+    c.close()
+    return
+
+
+def get_lang(id):
+    c = conn.cursor()
+    c.execute("SELECT lang FROM users WHERE id= {}".format(id))
+    lang = c.fetchone()
+    if lang:
+        lang = lang[0]
+    else:
+        lang = None
+    c.close()
+    return lang
 
 
 def translate(text, lang):
@@ -53,11 +94,11 @@ def translate(text, lang):
     return translate_res
 
 
-@app.route('/', methods=['POST'])  # для webhook
+# @app.route('/', methods=['POST'])  # для webhook
 def main():
     res_len = 0
-    # last_update = bot.get_updates()
-    last_update = request.get_json()  # для webhook
+    last_update = bot.get_updates()
+    # last_update = request.get_json()  # для webhook
     if last_update:
         chat_id = bot.get_chat_id(last_update)
         bot.mark_seen(chat_id)
@@ -83,20 +124,20 @@ def main():
                                  chat_id)  # вызываем три кнопки с одним описанием
                 text = None
             if text == '/lang ru' or text == '@yatranslate /lang ru':
-                lang_all.update({chat_id: 'ru'})
+                set_lang('ru', chat_id)
                 bot.send_message('Текст будет переводиться на Русский', chat_id)
                 text = None
             if text == '/lang en' or text == '@yatranslate /lang en':
-                lang_all.update({chat_id: 'en'})
+                set_lang('en', chat_id)
                 bot.send_message('Text will be translated into English', chat_id)
                 text = None
             if text == '/lang auto' or text == '@yatranslate /lang auto':
-                lang_all.update({chat_id: 'auto'})
+                set_lang('auto', chat_id)
                 bot.send_message('Русский|English - автоматически|automatically', chat_id)
                 text = None
-            if payload is not None:
-                lang_all.update({chat_id: payload})
-                lang = lang_all.get(chat_id)
+            if payload:
+                set_lang(payload, chat_id)
+                lang = get_lang(chat_id)
                 text = None
                 if lang == 'ru':
                     bot.send_answer_callback(callback_id, 'Текст будет переводиться на Русский')
@@ -113,10 +154,10 @@ def main():
                 'Отправьте или перешлите боту текст. Язык переводимого текста определяется автоматически. '
                 'Перевод по умолчанию на русский. Для изменения направления перевода используйте команду /lang',
                 chat_id)
-            lang_all.update({chat_id: 'ru'})
+            set_lang('ru', chat_id)
             text = None
-        if chat_id in lang_all.keys():
-            lang = lang_all.get(chat_id)
+        if chat_id:
+            lang = get_lang(chat_id)
         elif '-' in str(chat_id):
             lang = 'ru'
         else:
@@ -146,18 +187,18 @@ def main():
                     bot.send_reply_message(translt, mid, chat_id)
                 else:
                     bot.send_message(translt, chat_id)
-    return jsonify(last_update)  # для webhook
+    # return jsonify(last_update)  # для webhook
 
 
-if __name__ == '__main__':  # для webhook
-    try:
-        app.run(port=29347, host="0.0.0.0")
-    except KeyboardInterrupt:
-        exit()
-
-# if __name__ == '__main__':
+# if __name__ == '__main__':  # для webhook
 #    try:
-#        while True:
-#            main()
+#        app.run(port=29347, host="0.0.0.0")
 #    except KeyboardInterrupt:
 #        exit()
+
+if __name__ == '__main__':
+    try:
+        while True:
+            main()
+    except KeyboardInterrupt:
+        exit()
