@@ -153,7 +153,9 @@ def main():
             if type_upd == 'bot_started':
                 bot.send_message(
                     'Отправьте или перешлите боту текст. Язык переводимого текста определяется автоматически. '
-                    'Перевод по умолчанию на русский. Для изменения направления перевода используйте команду /lang',
+                    'Перевод по умолчанию на русский. Для изменения направления перевода используйте команду /lang\n'
+                    'Send or forward bot text. The language of the translated text is determined automatically. The '
+                    'default translation into Russian. To change the translation direction, use the command /lang',
                     chat_id)
                 set_lang('auto', chat_id)
                 text = None
