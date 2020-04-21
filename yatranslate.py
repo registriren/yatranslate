@@ -5,6 +5,7 @@ import requests
 import urllib
 import json
 import logging
+import re
 
 # from flask import Flask, request, jsonify  # для webhook
 
@@ -31,7 +32,6 @@ if not os.path.isfile('users.db'):
     conn.commit()
     c.close()
     conn.close()
-
 
 conn = sqlite3.connect("users.db", check_same_thread=False)
 
@@ -94,6 +94,19 @@ def translate(text, lang):
     return translate_res
 
 
+def symbol_control(TXT):
+    res = True
+    TXT = re.sub("(?P<url>https?://[^\s]+)", '', TXT)
+    TXT = re.sub('(\r|\n)', '', TXT)
+    TXT = re.sub('[^A-Za-zА-Яа-я ]', '', TXT)
+    TXT = re.sub('^ ', '', TXT)
+    TXT = re.sub(' +', ' ', TXT)
+    TXT = re.sub(' *$', '', TXT)
+    if len(TXT) < 2:
+        res = False
+    return res
+
+
 # @app.route('/', methods=['POST'])  # для webhook
 def main():
     res_len = 0
@@ -102,7 +115,6 @@ def main():
         # last_update = request.get_json()  # для webhook
         if last_update:
             chat_id = bot.get_chat_id(last_update)
-            bot.mark_seen(chat_id)
             type_upd = bot.get_update_type(last_update)
             text = bot.get_text(last_update)
             payload = bot.get_payload(last_update)
@@ -110,6 +122,9 @@ def main():
             callback_id = bot.get_callback_id(last_update)
             name = bot.get_name(last_update)
             admins = bot.get_chat_admins(chat_id)
+            att_type = bot.get_attach_type(last_update)
+            if att_type == 'share':
+                text = None
             if not admins or admins and name in [i['name'] for i in admins['members']]:
                 if text == '/lang' or text == '@yatranslate /lang':
                     buttons = [[{"type": 'callback',
@@ -182,7 +197,7 @@ def main():
                 else:
                     bot.send_construct_message(sid, 'Введите текст для перевода и отправки в чат | '
                                                     'Enter the text to be translated and send to the chat')
-            elif text:
+            elif text and symbol_control(text):
                 translt = translate(text, lang)
                 if translt:
                     len_sym = len(translt)
